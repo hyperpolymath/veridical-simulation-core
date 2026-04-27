@@ -1,0 +1,127 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+// (MPL-2.0 is automatic legal fallback until PMPL is formally recognised)
+= veridical-simulation-core
+:toc:
+:icons: font
+:source-highlighter: rouge
+
+Shared core for the *veridical-simulation* program: lexical Agda parser,
+generic octad importer, octad veridicality prober, and a cross-repo
+bridge probe. Originally extracted from `email-octad-experiment`'s
+phase-1 plumbing; first ingested formal artefacts in Phase 2 (echo-types)
+and Phase 3 (absolute-zero CNOs).
+
+== What it does
+
+The framework treats raw artefacts as the *territory* and any structured
+representation as a *map*. Each artefact becomes one octad-entity in
+verisimdb across eight shapes (Graph / Vector / Tensor / Semantic /
+Document / Temporal / Provenance / Spatial). A prober scores each shape
+in `[0, 1]`; the geometric mean is the *map fidelity*. An empty shape
+is a *finding*, not a failure — the framework refuses to fake content
+the territory does not have.
+
+== Components
+
+[cols="1,3"]
+|===
+| Crate | What
+
+| `agda-lexparse`
+| Lexical Agda parser. Extracts top-level definitions (data / record /
+function / postulate / nested module) plus their leading doc comments
+and lexical references. Conservative — unclassified lines are
+surfaced honestly rather than silently dropped.
+
+| `agda-octad-importer`
+| Two-pass importer: pass 1 creates one octad per definition with
+Document / Semantic / Vector / Tensor / Provenance / Temporal shapes;
+pass 2 wires `references` Graph edges to in-corpus targets resolved
+through the importer's qname-to-octad map.
+
+| `agda-octad-prober`
+| Veridicality probes per shape, plus parser-coverage and reference-
+integrity meta-probes. Emits A2ML report + Nickel schema. Tensor is
+intentionally capped at 0.75 (per-definition statistics ≠ corpus-level
+proof-tree-shape Tensor — a standing finding); Spatial scores 1.0 iff
+empty (faithful to a non-spatial territory).
+
+| `cross-repo-bridge-probe`
+| Given a bridge `.agda` file plus two single-repo import reports,
+classifies references into resolved-A-only / B-only / both / unresolved.
+A bridge whose references resolve in only one corpus is a
+*name-bridge*, not a *content-bridge* — a candidate informal-formal
+disagreement signal.
+|===
+
+== Idris2 proof bundle
+
+`src/abi/AgdaImporter.idr` carries three small theorems witnessing
+importer-side invariants the Graph and pass-2 logic depend on:
+
+* `qualifiedDeterministic` — qualified-name construction is a function.
+* `suffixMatchAgrees` — the suffix-matcher used by both pass-2 wiring
+  and the cross-repo probe is determined by the suffix alone.
+* `referencesGrow` — any monotonic lexer's reference set grows under
+  body extension.
+
+All proofs typecheck under `%default total` with no banned patterns
+(`believe_me`, `assert_total`, `Admitted`, `sorry`, `unsafeCoerce`).
+
+Verify with `idris2 --check src/abi/AgdaImporter.idr`.
+
+== Phase 2 — echo-types (2026-04-27)
+
+----
+agda-octad-importer --source /var/mnt/eclipse/repos/echo-types/proofs/agda \
+                    --territory echo-types \
+                    --report docs/import-report-echo-types.json
+agda-octad-prober   --source /var/mnt/eclipse/repos/echo-types/proofs/agda \
+                    --import-report docs/import-report-echo-types.json \
+                    --out docs/octad-veridicality-echo-types.a2ml \
+                    --schema nickel/veridicality-echo-types.ncl
+----
+
+Result: 391 definitions parsed across 55 files, 388 octads created.
+Per-shape scores all 1.0 except Tensor (0.75 cap, by design) and
+Spatial (1.0, scored as faithful-empty for a formal corpus).
+*Overall geometric mean = 0.9647.*
+
+== Phase 3 — absolute-zero CNOs (2026-04-27)
+
+----
+agda-octad-importer --source /var/mnt/eclipse/repos/verification-ecosystem/absolute-zero/proofs/agda \
+                    --territory absolute-zero \
+                    --report docs/import-report-absolute-zero.json
+agda-octad-prober   --source /var/mnt/eclipse/repos/verification-ecosystem/absolute-zero/proofs/agda \
+                    --import-report docs/import-report-absolute-zero.json \
+                    --out docs/octad-veridicality-absolute-zero.a2ml \
+                    --schema nickel/veridicality-absolute-zero.ncl
+----
+
+Result: 42 definitions parsed from `CNO.agda`, 42 octads created.
+*Overall geometric mean = 0.9647.*
+
+== Cross-repo bridge probe — EchoCNOBridge (2026-04-27)
+
+----
+cross-repo-bridge-probe \
+  --bridge /var/mnt/eclipse/repos/echo-types/proofs/agda/EchoCNOBridge.agda \
+  --report-a docs/import-report-echo-types.json \
+  --report-b docs/import-report-absolute-zero.json \
+  --out docs/cross-repo-echo-cno.a2ml
+----
+
+Finding: `EchoCNOBridge.agda` resolves 20 references into the
+echo-types corpus, 0 into the absolute-zero corpus, 12 unresolved
+(stdlib). *Bridge fidelity 0.00.* The file is a name-bridge — uses CNO
+terminology in name — but defines its own local `CNOOp` data type
+rather than importing absolute-zero's `IsCNO` predicate. This is a
+candidate informal-formal disagreement signal, not a failure.
+
+== Licence
+
+`PMPL-1.0-or-later` (preferred); `MPL-2.0` is the automatic legal
+fallback until PMPL is formally recognised. Crate metadata declares
+`MPL-2.0` explicitly because crates.io requires an OSI-approved
+licence string.

@@ -1,0 +1,17 @@
+PMPL-1.0-or-later (preferred)
+
+This software is licensed under the Hyperpolymath Practitioner's Mutual
+Public Licence (PMPL), version 1.0 or any later version, as the
+preferred licence. Until PMPL achieves formal legal recognition, this
+software is also automatically operative under the Mozilla Public
+Licence, version 2.0 (MPL-2.0), as the legal fallback declared by the
+maintainers.
+
+When PMPL is formally recognised, the SPDX identifier `PMPL-1.0-or-later`
+in source files takes full effect; no re-labelling is required.
+
+The full MPL-2.0 text is available at https://www.mozilla.org/MPL/2.0/
+and is included in this repository as `LICENSE-MPL-2.0` for crate /
+package registries that require an OSI-approved licence text on disk.
+
+Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>

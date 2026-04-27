@@ -1,0 +1,30 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# (MPL-2.0 is automatic legal fallback until PMPL is formally recognised)
+
+[cross-repo-bridge]
+bridge_path        = "/var/mnt/eclipse/repos/echo-types/proofs/agda/EchoCNOBridge.agda"
+territory_a        = "echo-types"
+territory_b        = "absolute-zero"
+bridge_definitions = 18
+unique_references  = 32
+
+[counts]
+resolved_a_only      = 20
+resolved_b_only      = 0
+resolved_in_both     = 0
+unresolved_anywhere  = 12
+bridge_fidelity      = 0.0000
+
+[finding]
+summary = "Bridge file `/var/mnt/eclipse/repos/echo-types/proofs/agda/EchoCNOBridge.agda` resolves 20 references — 20 into territory `echo-types` only, 0 into territory `absolute-zero` only, *zero* into both. The file is a *name-bridge* (uses both vocabularies in name) but not a *content-bridge* (no shared identifier resolves into both corpora). This is a candidate informal-formal disagreement signal; it does NOT mean the bridge is incorrect, only that it builds its own local model of the second domain rather than importing it."
+methodology = [
+  "Lexical classification: a reference matches an import-report qname if either (a) the unqualified suffixes are equal or (b) the full qnames are equal.",
+  "Bridge fidelity = resolved_in_both / resolved_anywhere. 0.0 means the file uses both domains' vocabularies in name but doesn't actually share content with both. Both corpora must have been ingested from the same parser pass for the comparison to be byte-faithful.",
+  "Stdlib references (Set, Nat, refl, Σ, ⊤, etc.) typically resolve in neither corpus — this is by design. The probe measures *cross-corpus* resolution, not absolute completeness.",
+]
+
+[samples]
+resolved_a_only = ["CNOOp", "Echo", "cno-preserves-echo", "cno-preserves-echo-execute", "cno-preserves-echo-nullop", "cno-preserves-echo-write", "cno-to-unit", "echo-intro", "execute-echo", "execute-operation-example"]
+resolved_b_only = []
+resolved_in_both = []
+unresolved_anywhere = ["CNOEcho", "Execute", "NullOp", "Read", "Set", "Write", "data", "echo", "read", "tt"]

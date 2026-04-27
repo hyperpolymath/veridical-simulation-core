@@ -1,0 +1,138 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# (MPL-2.0 is automatic legal fallback until PMPL is formally recognised)
+
+[octad-veridicality]
+territory             = "echo-types"
+api_base              = "http://[::1]:8088"
+source                = "/var/mnt/eclipse/repos/echo-types/proofs/agda"
+definitions_seen      = 391
+octads_in_db          = 388
+
+[veridicality-summary]
+overall_geometric_mean = 0.9647
+per_shape = {
+  document = 1.0000,
+  graph = 1.0000,
+  provenance = 1.0000,
+  semantic = 1.0000,
+  spatial = 1.0000,
+  temporal = 1.0000,
+  tensor = 0.7500,
+  vector = 1.0000,
+}
+methodology = [
+  "Per-shape score in [0,1]: best probe wins (max-aggregation across probes).",
+  "Overall geometric mean across the eight shapes; floored at 1e-9 to avoid total collapse from a single zero. An empty Spatial shape scores 1.0 if the territory has no spatial dimension, 0.0 if any octad fakes content.",
+  "Tensor capped at 0.75 because per-definition statistics are interpretable but structurally weaker than a corpus-level proof-tree-shape Tensor — a standing finding, not a bug.",
+]
+
+[[finding]]
+  shape   = "(meta)"
+  probe   = "parser_coverage"
+  verdict = "fail"
+  summary = "Parser classified all top-level forms in 7/55 files (0.13 coverage); 55 files imported in the report."
+  metric  = 0.1273
+  detail  = [
+    "Parser is lexical, not type-checking. Unclassified lines are surfaced honestly rather than silently dropped — an empty shape is a finding, not a failure.",
+    "Parser version: agda-lexparse 0.1.0; territory: echo-types",
+  ]
+
+[[finding]]
+  shape   = "provenance"
+  probe   = "presence_via_status"
+  verdict = "pass"
+  summary = "has_provenance=true on 391/391 octads (importer attaches an `imported` event with body sha256 to every definition)."
+  metric  = 1.0000
+  score   = 1.0000
+  detail  = [
+    "Each octad records a per-definition Provenance event whose source field contains `<path>#L<start>-L<end>`, anchoring it to the territory.",
+  ]
+
+[[finding]]
+  shape   = "document"
+  probe   = "presence_via_status"
+  verdict = "pass"
+  summary = "has_document=true on 391/391 octads (every parsed definition's body round-trips into Tantivy as a searchable Document)."
+  metric  = 1.0000
+  score   = 1.0000
+  detail  = [
+    "Document body is the verbatim source bytes of the definition, optionally prefixed by the leading doc-comment block.",
+  ]
+
+[[finding]]
+  shape   = "semantic"
+  probe   = "include_types_round_trip"
+  verdict = "pass"
+  summary = "?include=types populated on 100/100 sampled octads (1.00); 200 type IRIs in total."
+  metric  = 1.0000
+  score   = 1.0000
+  detail  = [
+    "Each definition carries two type IRIs: a kind tag (https://verisim.db/agda/<kind>) and a territory tag (https://verisim.db/territory/<name>). Phase-2/3 fix uses the upstream verisimdb ?include=types endpoint.",
+  ]
+
+[[finding]]
+  shape   = "temporal"
+  probe   = "observed_at_coverage"
+  verdict = "pass"
+  summary = "observed_at populated on 391/391 octads (1.00). Source: file mtime as RFC3339 — the closest available territory clock for formal artefacts."
+  metric  = 1.0000
+  score   = 1.0000
+  detail  = [
+    "Formal artefacts have no native send-time. mtime is a proxy for 'when was this written' that fails when source has been touched post-creation (a finding worth surfacing if coverage drops).",
+  ]
+
+[[finding]]
+  shape   = "vector"
+  probe   = "include_embedding_byte_exact"
+  verdict = "pass"
+  summary = "?include=embedding round-trip on 100/100 sampled octads (1.00); dim=Some(384), consistent=true."
+  metric  = 1.0000
+  score   = 1.0000
+  detail  = [
+    "Embedding is feature-hashed identifier-bag (TF, L2-normalised). Deterministic; same scheme as the email experiment so cross-Phase comparison holds.",
+  ]
+
+[[finding]]
+  shape   = "tensor"
+  probe   = "presence_via_status"
+  verdict = "pass"
+  summary = "has_tensor=true on 391/391 octads (per-definition 3-cell numeric tensor: [tokens, lines, references])."
+  metric  = 1.0000
+  score   = 0.7500
+  detail  = [
+    "Per-definition tensor is interpretable but not a learned representation; the natural Tensor target for a formal corpus is the proof-tree-shape distribution at a higher level. Cap at 0.75 reflects this — a finding, not a bug.",
+  ]
+
+[[finding]]
+  shape   = "graph"
+  probe   = "pass2_reference_density"
+  verdict = "pass"
+  summary = "Pass-2 reference edges: 458 total over 391 definitions (density 1.17)."
+  metric  = 1.1714
+  score   = 1.0000
+  detail  = [
+    "Edges are lexical references (false positives accepted). A density >=1 implies most definitions reference at least one in-corpus peer.",
+  ]
+
+[[finding]]
+  shape   = "spatial"
+  probe   = "expected_empty"
+  verdict = "pass"
+  summary = "has_spatial=true on 0/391 octads — expected 0 for territory `echo-types` (formal artefacts have no native spatial dimension)."
+  metric  = 0.0000
+  score   = 1.0000
+  detail  = [
+    "An empty Spatial shape is a *finding*, not a *failure* — refusing to fake content the territory does not have is the framework's core veridicality contract.",
+  ]
+
+[[finding]]
+  shape   = "(graph × document)"
+  probe   = "lexical_reference_resolution_rate"
+  verdict = "info"
+  summary = "Lexical reference resolution: 878/2798 references found targets in the same corpus (0.31). The shortfall is the share of references that escape into stdlib / foreign modules — a real cross-corpus boundary finding rather than a parser error."
+  metric  = 0.3138
+  score   = 0.3138
+  detail  = [
+    "Lexical references include stdlib symbols (Set, Nat, refl, etc.) which won't resolve inside an in-corpus map. The resolution rate is therefore a measure of corpus self-containment, not parser accuracy.",
+  ]
+

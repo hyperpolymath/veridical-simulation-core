@@ -1,0 +1,34 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# (MPL-2.0 is automatic legal fallback until PMPL is formally recognised)
+
+[package]
+name = "januskey-veridicality-probe"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "januskey-veridicality-probe"
+path = "src/main.rs"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+clap = { workspace = true }
+chrono = { workspace = true }
+anyhow = { workspace = true }
+reqwest = { workspace = true }
+tokio = { workspace = true }
+sha2 = { workspace = true }
+hex = { workspace = true }
+walkdir = { workspace = true }
+tempfile = { workspace = true }
+uuid = { workspace = true }
+
+# Path-dep on januskey-cli (the published crate name is `januskey`).
+# We use the `OperationExecutor`, `FileOperation`, and `JanusKey` types
+# directly so the probe runs the same code paths real users do.
+januskey = { path = "../../../../developer-ecosystem/januskey/crates/januskey-cli" }
+reversible-core = { path = "../../../../developer-ecosystem/januskey/crates/reversible-core" }
+vsc-shared = { path = "../vsc-shared" }

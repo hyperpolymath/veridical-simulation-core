@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# (MPL-2.0 is automatic legal fallback until PMPL is formally recognised)
+
+[package]
+name = "vsc-shared"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+serde = { workspace = true }

@@ -4,10 +4,15 @@
 [workspace]
 resolver = "2"
 members = [
+    "rust-core/vsc-shared",
     "rust-core/agda-lexparse",
     "rust-core/agda-octad-importer",
     "rust-core/agda-octad-prober",
     "rust-core/cross-repo-bridge-probe",
+    "rust-core/januskey-veridicality-probe",
+    "rust-core/chimichanga-veridicality-probe",
+    "rust-core/wharf-veridicality-probe",
+    "rust-core/reversibility-cluster-compose",
 ]
 
 [workspace.package]
@@ -29,3 +34,5 @@ reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-feature
 tokio = { version = "1", features = ["full"] }
 sha2 = "0.10"
 hex = "0.4"
+tempfile = "3"
+uuid = { version = "1", features = ["v4"] }

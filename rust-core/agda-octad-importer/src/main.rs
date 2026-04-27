@@ -29,9 +29,13 @@
 use agda_lexparse::{parse_directory, Definition, DefKind, ParsedFile};
 use anyhow::{Context, Result};
 use clap::Parser;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use std::collections::HashMap;
 use std::path::PathBuf;
+use vsc_shared::{
+    feature_hash_embedding, OctadRequestJson, OctadResponseJson, ProvenanceRequestJson,
+    TemporalRequestJson, TensorRequestJson,
+};
 
 const PARSER_VERSION: &str = "agda-lexparse 0.1.0";
 
@@ -55,63 +59,6 @@ struct Cli {
     /// Path to write the import report.
     #[arg(long)]
     report: PathBuf,
-}
-
-#[derive(Serialize)]
-struct OctadRequestJson {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    title: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    body: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    embedding: Option<Vec<f32>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    types: Option<Vec<String>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    relationships: Option<Vec<(String, String)>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    tensor: Option<TensorRequestJson>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    temporal: Option<TemporalRequestJson>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    provenance: Option<ProvenanceRequestJson>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    spatial: Option<SpatialRequestJson>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    metadata: Option<HashMap<String, String>>,
-}
-
-#[derive(Serialize)]
-struct TensorRequestJson {
-    shape: Vec<usize>,
-    data: Vec<f64>,
-}
-
-#[derive(Serialize)]
-struct ProvenanceRequestJson {
-    event_type: String,
-    actor: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    source: Option<String>,
-    description: String,
-}
-
-#[derive(Serialize)]
-struct TemporalRequestJson {
-    observed_at: String,
-}
-
-/// Spatial is intentionally never populated — left as a struct here only
-/// to preserve a stable JSON shape parallel to other importers.
-#[derive(Serialize)]
-struct SpatialRequestJson {
-    latitude: f64,
-    longitude: f64,
-}
-
-#[derive(Deserialize, Debug)]
-struct OctadResponseJson {
-    id: String,
 }
 
 #[derive(Default, Serialize)]
@@ -388,34 +335,6 @@ fn kind_types(kind: DefKind, territory: &str) -> Vec<String> {
     vec![kind_iri, territory_iri]
 }
 
-/// Deterministic feature-hashing TF embedding. Each token contributes
-/// `+1.0` to its hash bucket (mod `dim`); the result is L2-normalised.
-/// Identical to the email-octad-experiment scheme so cross-Phase
-/// comparisons hold.
-fn feature_hash_embedding(tokens: &[String], dim: usize) -> Vec<f32> {
-    let mut v = vec![0.0f32; dim.max(1)];
-    let len = v.len();
-    for t in tokens {
-        let h = stable_hash(t.as_bytes()) as usize;
-        v[h % len] += 1.0;
-    }
-    let mut norm = 0.0f32;
-    for x in &v {
-        norm += x * x;
-    }
-    let norm = norm.sqrt().max(1e-9);
-    for x in &mut v {
-        *x /= norm;
-    }
-    v
-}
-
-fn stable_hash(bytes: &[u8]) -> u64 {
-    // FNV-1a 64-bit — deterministic across machines, fast.
-    let mut h: u64 = 0xcbf29ce484222325;
-    for b in bytes {
-        h ^= *b as u64;
-        h = h.wrapping_mul(0x100000001b3);
-    }
-    h
-}
+// `feature_hash_embedding` and the FNV-1a `fnv1a_64` hash now live in
+// vsc-shared (re-imported above) so every probe in the workspace
+// re-derives the same embedding bytes from the same tokens.

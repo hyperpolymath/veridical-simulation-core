@@ -1,0 +1,54 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Echidnabot priorities — Phase 4a (januskey filesystem reversibility).
+
+[priority]
+phase     = "4a"
+target    = "januskey"
+created   = "2026-04-27"
+status    = "discharged-with-followups"
+
+# ---- formal claims (discharged) ----
+
+[[claim]]
+id         = "P4a-F1"
+kind       = "formal"
+statement  = "`OperationType.inverse` is involutive on the four self-inverse kinds: Modify, Move, Chmod, Chown."
+strategy   = "Refl per kind."
+discharge  = "src/abi/Phase4aJanuskey.idr#modifyInvolutive, moveInvolutive, chmodInvolutive, chownInvolutive"
+buys       = "for the self-inverse kinds, executing the inverse and then the inverse-of-the-inverse is exactly the original — no intermediate transformation needed."
+
+[[claim]]
+id         = "P4a-F2"
+kind       = "formal"
+statement  = "Delete and Create are mutual inverses: inverseT(inverseT(Delete)) = Delete and inverseT(inverseT(Create)) = Create."
+strategy   = "Refl per direction."
+discharge  = "src/abi/Phase4aJanuskey.idr#deleteCreateMutualA, deleteCreateMutualB"
+buys       = "the asymmetric Delete↔Create round-trip is structurally sound; the runtime's `undo_delete` (restore content) and `undo_create` (delete) compose to identity."
+
+[[claim]]
+id         = "P4a-F3"
+kind       = "formal"
+statement  = "`Copy` is *not* involutive: inverseT(inverseT(Copy)) = Create, not Copy. This is by design — the inverse of copy is delete-the-copy."
+strategy   = "Refl on the asymmetric chain Copy → Delete → Create."
+discharge  = "src/abi/Phase4aJanuskey.idr#copyNotInvolutive"
+buys       = "the framework records the asymmetry as a typed fact rather than a bug; consumers can pattern-match on `Copy` and treat its undo specially."
+
+# ---- formal claims (pending follow-ups for echidnabot) ----
+
+[[claim]]
+id         = "P4a-F4-pending"
+kind       = "formal"
+statement  = "For any plan `ops : List FileOperation`, the LIFO undo cascade returns the territory to its initial byte-image, given each individual operation's `undo` already does so."
+strategy   = "structural induction on ops; needs a stateful model of the filesystem (sketch: model state as a finite map path → bytes; each op transitions the map; per-op `undo` reverts the map; LIFO gives the inverse of the forward fold)."
+discharge  = "pending"
+buys       = "the Phase 4a probe's `inverse-round-trip = 1.0` would be backed by a structural theorem rather than a 6-op witness; new variants added to FileOperation would auto-trigger a proof obligation."
+
+# ---- empirical claims (discharged) ----
+
+[[claim]]
+id         = "P4a-E1"
+kind       = "empirical"
+statement  = "Synthetic 5-file territory + 6 forward ops (CREATE / MODIFY / MOVE / COPY / CHMOD / DELETE) + 6 LIFO undos returns to byte-exact identity (135 bytes, 5 files, mode included)."
+strategy   = "the Phase 4a probe — januskey-veridicality-probe."
+discharge  = "/var/mnt/eclipse/repos/email-octad-experiment/docs/octad-veridicality-januskey.a2ml (inverse-round-trip = 1.0000)"
+buys       = "januskey's reversibility claim holds end-to-end on every variant exercised; per-shape mean = 0.9647."

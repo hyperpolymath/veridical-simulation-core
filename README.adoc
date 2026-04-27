@@ -54,21 +54,67 @@ A bridge whose references resolve in only one corpus is a
 disagreement signal.
 |===
 
-== Idris2 proof bundle
+== Idris2 proof bundles
 
-`src/abi/AgdaImporter.idr` carries three small theorems witnessing
-importer-side invariants the Graph and pass-2 logic depend on:
+Each phase ships a small per-target theorem bundle alongside the empirical
+probe report. All proofs typecheck under `%default total` with no banned
+patterns (`believe_me`, `assert_total`, `Admitted`, `sorry`, `unsafeCoerce`).
 
-* `qualifiedDeterministic` — qualified-name construction is a function.
-* `suffixMatchAgrees` — the suffix-matcher used by both pass-2 wiring
-  and the cross-repo probe is determined by the suffix alone.
-* `referencesGrow` — any monotonic lexer's reference set grows under
-  body extension.
+[cols="2,1,3"]
+|===
+| Bundle | Theorems | Buys
 
-All proofs typecheck under `%default total` with no banned patterns
-(`believe_me`, `assert_total`, `Admitted`, `sorry`, `unsafeCoerce`).
+| `src/abi/AgdaImporter.idr`
+| 3
+| Importer-side invariants the Graph and pass-2 logic depend on:
+  qualified-name determinism, suffix-match agreement, lexer
+  reference-set monotonicity.
 
-Verify with `idris2 --check src/abi/AgdaImporter.idr`.
+| `src/abi/Phase1Verisim.idr`
+| 3
+| Phase 1 fixes are identity functions on their respective fields:
+  temporal RFC 3339 round-trip, `?include=types` preservation,
+  `?include=embedding` byte-exactness.
+
+| `src/abi/Phase2EchoTypes.idr`
+| 3
+| Conservation of definitions (`created + failed = seen`) +
+  pass-2 wiring is a sublist of pass-1 candidates.
+
+| `src/abi/Phase3AbsoluteZero.idr`
+| 3
+| `bridge_fidelity ∈ [0, 1]` and a decidable `isNameBridge`
+  predicate that captures the EchoCNOBridge finding.
+
+| `src/abi/Phase4aJanuskey.idr`
+| 6
+| `OperationType.inverse` is involutive on the four self-inverse
+  kinds; Delete↔Create are mutual inverses; Copy is *not*
+  involutive (recorded as a typed fact).
+
+| `src/abi/Phase4bChimichanga.idr`
+| 6
+| Per-capability `expand_one` shapes are pinned by `Refl` (drift
+  in any single case re-breaks the corresponding equation);
+  Jaccard similarity is bounded in [0, 1].
+
+| `src/abi/Phase4cWharf.idr`
+| 3
+| Per-snapshot `read ∘ write = id` and base-case retention
+  idempotence on the empty ledger.
+|===
+
+Verify any one with:
+
+----
+cd src/abi && idris2 --check <Bundle>.idr
+----
+
+Outstanding follow-up theorems (LIFO undo cascade for januskey, the
+`includes? ↔ ∈ expand` biconditional for chimichanga, retention
+idempotence for arbitrary lists, etc.) are queued for echidnabot
+under `echidnabot-priorities/<phase>-proofs.a2ml` with claim
+statement, strategy, and what each buys.
 
 == Phase 2 — echo-types (2026-04-27)
 

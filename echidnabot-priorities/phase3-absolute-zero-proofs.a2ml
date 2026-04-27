@@ -1,0 +1,62 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Echidnabot priorities — Phase 3 (absolute-zero CNO + cross-repo bridge).
+
+[priority]
+phase     = "3"
+target    = "absolute-zero + EchoCNOBridge"
+created   = "2026-04-27"
+status    = "discharged-with-followups"
+
+# ---- formal claims (discharged) ----
+
+[[claim]]
+id         = "P3-F1"
+kind       = "formal"
+statement  = "Bridge-fidelity numerator (`in_both`) is bounded above by the denominator (`resolved_anywhere = a_only + b_only + in_both`)."
+strategy   = "LTE over Nat with plusCommutative + lteAddRight; gives the [0, 1] bound on the rational ratio."
+discharge  = "src/abi/Phase3AbsoluteZero.idr#inBothBoundedByResolved"
+buys       = "every bridge-fidelity score the cross-repo probe emits is in [0, 1] by construction; downstream consumers can rely on it without re-validating."
+
+[[claim]]
+id         = "P3-F2"
+kind       = "formal"
+statement  = "`isNameBridge` characterises the EchoCNOBridge finding: in_both = 0 ∧ (a_only > 0 ∨ b_only > 0) → True."
+strategy   = "case analysis on inBoth and the (aOnly, bOnly) pair."
+discharge  = "src/abi/Phase3AbsoluteZero.idr#isNameBridge, emptyIsNotNameBridge, echoCNOBridgeIsNameBridge"
+buys       = "the framework's classification of EchoCNOBridge as a name-bridge is decidable, not a heuristic — same predicate runs over any future bridge file."
+
+# ---- formal claims (pending follow-ups for echidnabot) ----
+
+[[claim]]
+id         = "P3-F3-pending"
+kind       = "formal"
+statement  = "Suffix-match resolution (the unqualified-name lookup the cross-repo probe and pass-2 wirer both use) is reflexive AND symmetric: matchesBySuffix(s, r) = matchesBySuffix(r, s)."
+strategy   = "extend `suffixMatchAgrees` (already in AgdaImporter.idr) with the symmetric direction; Refl after one rewrite."
+discharge  = "pending"
+buys       = "the cross-repo probe's `a_only / b_only / in_both` partition is invariant under the order of the two import reports — switch report-A and report-B and the buckets swap, nothing else moves."
+
+[[claim]]
+id         = "P3-F4-pending"
+kind       = "formal"
+statement  = "If echo-types and absolute-zero are typechecked under a common Agda library configuration that exposes both, EchoCNOBridge's bridge_fidelity ≥ 0.10 (i.e. at least one shared identifier)."
+strategy   = "depends on https://github.com/hyperpolymath/echo-types/issues/21 being addressed; the lemma would then be a witness over the rewritten EchoCNOBridge.agda showing IsCNO appears in the resolved-in-both set."
+discharge  = "pending — blocked on echo-types issue #21"
+buys       = "promotes the bridge from a name-bridge to a content-bridge; the framework reclassifies it accordingly."
+
+# ---- empirical claims (discharged) ----
+
+[[claim]]
+id         = "P3-E1"
+kind       = "empirical"
+statement  = "absolute-zero CNO.agda overall geometric mean = 0.9647."
+strategy   = "rerun agda-octad-importer + agda-octad-prober against absolute-zero/proofs/agda."
+discharge  = "/var/mnt/eclipse/repos/verification-ecosystem/veridical-simulation-core/docs/octad-veridicality-absolute-zero.a2ml"
+buys       = "the framework's per-shape contract is independent of corpus size (42 defs vs 391 in echo-types — same per-shape result)."
+
+[[claim]]
+id         = "P3-E2"
+kind       = "empirical"
+statement  = "EchoCNOBridge.agda is a name-bridge: 20 in echo-types, 0 in absolute-zero, 12 unresolved → bridge_fidelity = 0.00."
+strategy   = "the cross-repo-bridge-probe — a real territorial finding, not a failure."
+discharge  = "/var/mnt/eclipse/repos/verification-ecosystem/veridical-simulation-core/docs/cross-repo-echo-cno.a2ml + https://github.com/hyperpolymath/echo-types/issues/21"
+buys       = "Phase 3 produces its first-class output: a candidate informal-formal disagreement signal between two repos."

@@ -1,0 +1,62 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Echidnabot priorities — Phase 4b (chimichanga capability attenuation).
+
+[priority]
+phase     = "4b"
+target    = "chimichanga"
+created   = "2026-04-27"
+status    = "discharged-with-followups"
+
+# ---- formal claims (discharged) ----
+
+[[claim]]
+id         = "P4b-F1"
+kind       = "formal"
+statement  = "`Munition.Host.Capabilities.expand_one/1` returns its input as the head of the expansion for every standard capability."
+strategy   = "explicit `expandOne C = [...]` Refl per capability — runtime drift in any single case re-breaks the corresponding equation."
+discharge  = "src/abi/Phase4bChimichanga.idr#expandOneTime, expandOneRandom, expandOneLog, expandOneFsRead, expandOneFsWrite, expandOneNetwork"
+buys       = "any change to expand_one in the Elixir runtime that drops a capability from its own expansion would surface as a typecheck failure here, not a silent semantic shift."
+
+[[claim]]
+id         = "P4b-F2"
+kind       = "formal"
+statement  = "`expand_one(:filesystem_write) = [:filesystem_write, :filesystem_read]` — `:filesystem_write` is the single non-trivial closure entry."
+strategy   = "Refl on the explicit expansion."
+discharge  = "src/abi/Phase4bChimichanga.idr#expandOneFsWrite"
+buys       = "the file-system capability hierarchy is fully captured here; if a future runtime adds (e.g.) `:filesystem_append` implying `:filesystem_write`, this proof must be extended — that is the trigger we want."
+
+[[claim]]
+id         = "P4b-F3"
+kind       = "formal"
+statement  = "Jaccard similarity of two finite capability sets has intersection ≤ union (the [0, 1] bound)."
+strategy   = "LTE structural witness over `MkJ intersection union`."
+discharge  = "src/abi/Phase4bChimichanga.idr#jaccardWellFormed, chimichangaJaccardWellFormed"
+buys       = "the Phase 4b `claim_match` metric is bounded by construction; the 0.5000 reading is well-typed, not an artefact."
+
+# ---- formal claims (pending follow-ups for echidnabot) ----
+
+[[claim]]
+id         = "P4b-F4-pending"
+kind       = "formal"
+statement  = "`includes?(granted, requested) = True ↔ requested ∈ expand(granted)`."
+strategy   = "biconditional; one direction is the runtime definition; the other needs a List-membership lemma (e.g. via `Data.List.Elem`)."
+discharge  = "pending"
+buys       = "the public `Munition.Host.Capabilities.includes?` API is faithful to the underlying expansion semantics; runtime drift between the two would be a proof obligation."
+
+# ---- empirical claims (discharged) ----
+
+[[claim]]
+id         = "P4b-E1"
+kind       = "empirical"
+statement  = "Code-claim ({time, random, log, filesystem_read, filesystem_write, network}) and doc-claim ({compute, memory_read, memory_write, host_call, filesystem_read, filesystem_write, network, time, random}) Jaccard = 0.5000; escalation count = 1 (`:log`); 4 doc-only capabilities."
+strategy   = "the chimichanga-veridicality-probe."
+discharge  = "/var/mnt/eclipse/repos/email-octad-experiment/docs/octad-veridicality-chimichanga.a2ml + https://github.com/hyperpolymath/chimichanga/pull/12"
+buys       = "Phase 4b's first-class output is a real informal-formal disagreement, captured rather than papered over; PR #12 aligns the doc to the runtime."
+
+[[claim]]
+id         = "P4b-E2"
+kind       = "empirical"
+statement  = "After PR #12 merges, claim_match should rise to ≥ 0.86 (6/7 — `compute/memory_*` deliberately stay implicit-only)."
+strategy   = "rerun the probe post-merge."
+discharge  = "pending PR #12 merge"
+buys       = "the framework's audit closes the loop on its own finding, not just reporting it."

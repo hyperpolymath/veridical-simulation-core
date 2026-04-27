@@ -1,0 +1,44 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Echidnabot priorities — Phase 1 (verisim-api gap closure).
+
+[priority]
+phase     = "1"
+target    = "verisimdb"
+created   = "2026-04-27"
+status    = "discharged"
+
+# ---- formal claims (all discharged) ----
+
+[[claim]]
+id         = "P1-F1"
+kind       = "formal"
+statement  = "OctadInput.temporal.observed_at round-trips to OctadStatus.observed_at as the identity on RFC 3339 strings."
+strategy   = "abstract identity over an opaque RFC3339 type; Refl"
+discharge  = "src/abi/Phase1Verisim.idr#temporalRoundTripCorrect"
+buys       = "the Phase 1 prober's `temporal_observed_coverage_and_accuracy = 1.0` is structural, not coincidental."
+
+[[claim]]
+id         = "P1-F2"
+kind       = "formal"
+statement  = "GET /octads/{id}?include=types is the identity projection on the ingested semantic_types list."
+strategy   = "abstract identity over List String; Refl"
+discharge  = "src/abi/Phase1Verisim.idr#includeTypesIsIdentity"
+buys       = "the Phase 1 prober's `include_types_round_trip = 1.0` is the identity, not a heuristic."
+
+[[claim]]
+id         = "P1-F3"
+kind       = "formal"
+statement  = "GET /octads/{id}?include=embedding round-trips byte-exact (bitwise reflexivity over the Vec<f32>)."
+strategy   = "abstract identity over List Bits32; Refl"
+discharge  = "src/abi/Phase1Verisim.idr#includeEmbeddingByteExact"
+buys       = "byte-exact comparison via `f32::to_bits` in the prober is justified by reflexivity, not floating-point tolerance."
+
+# ---- empirical claims (all discharged) ----
+
+[[claim]]
+id         = "P1-E1"
+kind       = "empirical"
+statement  = "On the email-octad-experiment 158-message corpus the overall geometric mean rises from 0.7082 (pre-Phase-1) to ≥ 0.85 after the verisim-api fixes."
+strategy   = "rerun the email-experiment prober against a fresh verisim-api built on the Phase 1 commits (ac02abb, ca52651, 3e55b08)."
+discharge  = "/var/mnt/eclipse/repos/email-octad-experiment/docs/octad-veridicality-phase1.a2ml (overall = 0.8918)"
+buys       = "Phase 1 succeeded against its own success criterion; further phases can rely on the corpus mean staying ≥ 0.85."

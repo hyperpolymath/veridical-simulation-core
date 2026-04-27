@@ -1,0 +1,54 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Echidnabot priorities — Phase 2 (echo-types).
+
+[priority]
+phase     = "2"
+target    = "echo-types"
+created   = "2026-04-27"
+status    = "discharged-with-followups"
+
+# ---- formal claims (discharged) ----
+
+[[claim]]
+id         = "P2-F1"
+kind       = "formal"
+statement  = "Conservation of definitions: octads_created + octads_failed = definitions_seen."
+strategy   = "Nat additive identity; rewrite with plusCommutative for the swapped-addend form."
+discharge  = "src/abi/Phase2EchoTypes.idr#conservation, conservationCommutative"
+buys       = "every Phase 2/3 import-report row sums to definitions_seen by construction; drift would be a parser/ingest bug, not a counting error."
+
+[[claim]]
+id         = "P2-F2"
+kind       = "formal"
+statement  = "Pass-2 graph wiring is a sublist of the pass-1 candidate set: `selectByIsSublist`."
+strategy   = "structural induction over the candidate list with `with`-clauses on the predicate."
+discharge  = "src/abi/Phase2EchoTypes.idr#selectByIsSublist"
+buys       = "pass-2 cannot invent edges to qnames that weren't ingested in pass-1; every wired target is in the qname_to_octad map by construction."
+
+[[claim]]
+id         = "P2-F3"
+kind       = "formal"
+statement  = "Qualified-name construction is deterministic (same module + same local-name implies same qualified-name)."
+strategy   = "double-rewrite over the namespace and local-name equality witnesses; Refl."
+discharge  = "src/abi/AgdaImporter.idr#qualifiedDeterministic"
+buys       = "every call site that re-derives a qname from the same source resolves to the same key — pass-2 wiring depends on this."
+
+# ---- formal claims (pending follow-ups for echidnabot) ----
+
+[[claim]]
+id         = "P2-F4-pending"
+kind       = "formal"
+statement  = "If a definition's reference list contains a qname that is in the qname_to_octad map, then pass-2 wires exactly one `references` edge per such qname (no duplicates)."
+strategy   = "structural induction with a 50-cap predicate; uses the existing `selectBy` machinery + a uniqueness lemma over qname keys."
+discharge  = "pending"
+buys       = "the pass-2 edge count equals the in-map subset of the reference list, exactly. Currently witnessed empirically (`graph_pass2 = 458` on echo-types); a proof would tighten it to a structural guarantee."
+
+# ---- empirical claims (discharged) ----
+
+[[claim]]
+id         = "P2-E1"
+kind       = "empirical"
+statement  = "echo-types overall geometric mean = 0.9647."
+strategy   = "rerun agda-octad-importer + agda-octad-prober against echo-types/proofs/agda."
+discharge  = "/var/mnt/eclipse/repos/verification-ecosystem/veridical-simulation-core/docs/octad-veridicality-echo-types.a2ml"
+buys       = "Phase 2 success criterion met; the framework's per-shape map-fidelity holds against a 388-octad formal corpus."

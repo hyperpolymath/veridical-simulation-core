@@ -2,3 +2,7 @@
 /target/
 *.swp
 .DS_Store
+# Idris2 typechecker artefacts
+src/abi/build/
+*.ttc
+*.ttm

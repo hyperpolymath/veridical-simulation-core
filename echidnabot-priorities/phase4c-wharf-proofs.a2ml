@@ -1,0 +1,70 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Echidnabot priorities — Phase 4c (project-wharf snapshot recovery).
+
+[priority]
+phase     = "4c"
+target    = "project-wharf"
+created   = "2026-04-27"
+status    = "discharged-with-followups"
+
+# ---- formal claims (discharged) ----
+
+[[claim]]
+id         = "P4c-F1"
+kind       = "formal"
+statement  = "Per-snapshot read/write round-trip is the identity on the payload byte-string: `readSnapshot (writeSnapshot p) = p`."
+strategy   = "Refl over an opaque `Payload = List Bits8`."
+discharge  = "src/abi/Phase4cWharf.idr#snapshotRoundTrip"
+buys       = "the reference snapshot ledger's per-snapshot byte-exact recovery is a typed identity, not a coincidence; any future `wharf-core` impl that breaks this round-trip fails the ABI."
+
+[[claim]]
+id         = "P4c-F2"
+kind       = "formal"
+statement  = "Retention applied to the empty list returns the empty list, for every retention budget n."
+strategy   = "case analysis on n; Refl per branch."
+discharge  = "src/abi/Phase4cWharf.idr#retentionEmpty"
+buys       = "the retention rule is well-defined on edge cases that matter at startup (empty ledger) and end-of-life (manual cleanup)."
+
+[[claim]]
+id         = "P4c-F3"
+kind       = "formal"
+statement  = "Retention idempotence base case: `enforceRetention n (enforceRetention n []) = enforceRetention n []`."
+strategy   = "case analysis on n; Refl per branch."
+discharge  = "src/abi/Phase4cWharf.idr#retentionEmptyIdempotent"
+buys       = "covers the empty-list fixed point of retention; the recursive case (non-empty ledger) is the natural follow-on."
+
+# ---- formal claims (pending follow-ups for echidnabot) ----
+
+[[claim]]
+id         = "P4c-F4-pending"
+kind       = "formal"
+statement  = "Retention is idempotent on every list: `enforceRetention n (enforceRetention n xs) = enforceRetention n xs` for all n, xs."
+strategy   = "structural induction on xs paired with case-analysis on n; uses the take-from-front model in Phase4cWharf.idr."
+discharge  = "pending"
+buys       = "applying the retention rule twice is the same as once — the runtime can call enforce_retention liberally without amplifying the prune set."
+
+[[claim]]
+id         = "P4c-F5-pending"
+kind       = "formal"
+statement  = "Retention preserves order: `enforceRetention n xs` is a prefix of `xs`."
+strategy   = "structural induction on xs; the take-from-front model makes this `Prefix` directly."
+discharge  = "pending"
+buys       = "the snapshot history is monotone — pruning keeps the newest items contiguously, never reorders or interleaves."
+
+# ---- empirical claims (discharged) ----
+
+[[claim]]
+id         = "P4c-E1"
+kind       = "empirical"
+statement  = "Reference snapshot ledger over 10 rounds, snapshots_to_keep=10, snapshot_dir=`.wharf/snapshots`: 10/10 retained snapshots recovered byte-exact, 0 retention violations."
+strategy   = "the Phase 4c probe — wharf-veridicality-probe."
+discharge  = "/var/mnt/eclipse/repos/email-octad-experiment/docs/octad-veridicality-project-wharf.a2ml"
+buys       = "the declared `StateConfig` contract is sound; an implementation respecting it can hit byte-exact T-N recovery."
+
+[[claim]]
+id         = "P4c-E2"
+kind       = "empirical"
+statement  = "`fn snapshot/restore/recover/create_snapshot` are not yet defined in project-wharf source — implementation-presence = 0."
+strategy   = "the wharf-veridicality-probe greps the project-wharf source tree."
+discharge  = "/var/mnt/eclipse/repos/email-octad-experiment/docs/octad-veridicality-project-wharf.a2ml + https://github.com/hyperpolymath/project-wharf/issues/14"
+buys       = "the framework's first-class output for Phase 4c is the impl gap — captured rather than papered over; issue #14 tracks the close."

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 // (MPL-2.0 is automatic legal fallback until PMPL is formally recognised)
 //! Veridicality probe across the octad for an Agda corpus already
 //! ingested into verisimdb. Mirrors the email-octad-experiment prober's
@@ -600,7 +600,7 @@ fn compute_summary(findings: &[Finding]) -> VeridicalitySummary {
 
 fn render_a2ml(r: &Report) -> String {
     let mut s = String::new();
-    s.push_str("# SPDX-License-Identifier: PMPL-1.0-or-later\n");
+    s.push_str("# SPDX-License-Identifier: MPL-2.0\n");
     s.push_str("# (MPL-2.0 is automatic legal fallback until PMPL is formally recognised)\n\n");
     s.push_str("[octad-veridicality]\n");
     s.push_str(&format!("territory             = \"{}\"\n", r.territory));
@@ -644,7 +644,7 @@ fn render_a2ml(r: &Report) -> String {
 }
 
 fn render_nickel() -> String {
-    r#"# SPDX-License-Identifier: PMPL-1.0-or-later
+    r#"# SPDX-License-Identifier: MPL-2.0
 let UnitInterval = std.contract.from_predicate (fun x => x >= 0.0 && x <= 1.0) in
 {
   octad-veridicality | {

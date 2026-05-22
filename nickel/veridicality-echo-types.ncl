@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 let UnitInterval = std.contract.from_predicate (fun x => x >= 0.0 && x <= 1.0) in
 {
   octad-veridicality | {

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 // (MPL-2.0 is automatic legal fallback until PMPL is formally recognised)
 //! Ingests parsed Agda definitions into a running verisimdb instance as
 //! one octad-entity per definition. Phase 2 (echo-types) and Phase 3

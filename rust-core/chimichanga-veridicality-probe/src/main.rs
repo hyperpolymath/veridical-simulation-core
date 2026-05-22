@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 // (MPL-2.0 is automatic legal fallback until PMPL is formally recognised)
 //! Phase 4b of the veridical-simulation program — chimichanga
 //! capability-attenuation veridicality probe.
@@ -754,7 +754,7 @@ fn ratio(num: usize, den: usize) -> f64 {
 
 fn render_a2ml(r: &PhaseReport) -> String {
     let mut s = String::new();
-    s.push_str("# SPDX-License-Identifier: PMPL-1.0-or-later\n");
+    s.push_str("# SPDX-License-Identifier: MPL-2.0\n");
     s.push_str(
         "# (MPL-2.0 is automatic legal fallback until PMPL is formally recognised)\n\n",
     );

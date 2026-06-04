@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MPL-2.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 // (MPL-2.0 is automatic legal fallback until PMPL is formally recognised)
 //! Phase 4 cross-target compose — combines the three Phase 4 single-
 //! target reports (januskey filesystem, chimichanga process,

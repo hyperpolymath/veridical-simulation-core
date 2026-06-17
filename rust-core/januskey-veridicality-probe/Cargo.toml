@@ -29,6 +29,6 @@ uuid = { workspace = true }
 # Path-dep on januskey-cli (the published crate name is `januskey`).
 # We use the `OperationExecutor`, `FileOperation`, and `JanusKey` types
 # directly so the probe runs the same code paths real users do.
-januskey = { path = "../../../../developer-ecosystem/januskey/crates/januskey-cli" }
-reversible-core = { path = "../../../../developer-ecosystem/januskey/crates/reversible-core" }
+januskey = { path = "../../../januskey/crates/januskey-cli" }
+reversible-core = { path = "../../../januskey/crates/reversible-core" }
 vsc-shared = { path = "../vsc-shared" }

@@ -1,4 +1,5 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 // (MPL-2.0 is automatic legal fallback until PMPL is formally recognised)
 //! Cross-repo bridge probe: given a bridge `.agda` file plus the import
 //! reports from two single-repo phases, classify every lexical
@@ -199,7 +200,7 @@ fn matches_any(qname_to_octad: &HashMap<String, String>, r: &str) -> bool {
 
 fn render_a2ml(r: &CrossRepoReport) -> String {
     let mut s = String::new();
-    s.push_str("# SPDX-License-Identifier: PMPL-1.0-or-later\n");
+    s.push_str("# SPDX-License-Identifier: MPL-2.0\n");
     s.push_str("# (MPL-2.0 is automatic legal fallback until PMPL is formally recognised)\n\n");
     s.push_str("[cross-repo-bridge]\n");
     s.push_str(&format!("bridge_path        = {:?}\n", r.bridge_path));

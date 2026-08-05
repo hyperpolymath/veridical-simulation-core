@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: MPL-2.0
+# gitleaks configuration for veridical-simulation-core.
+#
+# TWO SILENT SYNTAX TRAPS in the pinned gitleaks — both fail with no error and
+# no effect, so a config written either way looks correct and suppresses
+# nothing:
+#   1. The block must be `[allowlist]` (SINGULAR). `[[allowlists]]` is ignored.
+#   2. `regexes = [...]` is ignored; only `paths` is honoured.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = """
+A generated import report. All eight findings are content-addressed hashes and
+identifiers inside docs/import-report-echo-types.json — machine-produced
+high-entropy strings, not credentials.
+
+Scoped to the single file rather than docs/, so any real secret pasted into
+documentation is still caught.
+"""
+paths = [
+  '''^docs/import-report-echo-types\.json$''',
+]

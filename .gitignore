@@ -6,3 +6,5 @@
 src/abi/build/
 *.ttc
 *.ttm
+
+node_modules/
